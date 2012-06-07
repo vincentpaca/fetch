@@ -4,12 +4,15 @@ require 'anemone'
 require 'uri'
 
 class GoogleFetch
-  def initialize(tags, num_of_pages)
-    @tags = tags
-    @pages = num_of_pages
+  def initialize()
+    puts "Input the tags to search for separated in spaces : " 
+    @tags = gets.chomp
+    puts "How many results would you like? Give a number: "
+    @pages = gets.chomp
   end
 
   def start
+    puts "Crawling #{@pages} result(s) for '#{@tags}'"
     clean_tag = @tags.gsub(" ", "+");
     url = "http://www.google.com/search?num=#{@pages}&q=#{clean_tag}"
     result = Nokogiri::HTML(open(url))
@@ -32,7 +35,7 @@ class GoogleFetch
 	end
       end
     end
-
+  puts "Done! Check output.txt for emails. MUHAHAHAHAH >:)" 
   end
 end
 
