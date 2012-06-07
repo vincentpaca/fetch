@@ -16,7 +16,7 @@ class GoogleFetch
     clean_tag = @tags.gsub(" ", "+");
     url = "http://www.google.com/search?num=#{@pages}&q=#{clean_tag}"
     result = Nokogiri::HTML(open(url))
-    
+    ctr = 0
     File.open('output.txt', 'w') do |f|
       result.css('h3.r a').each do |link|
         host = URI.parse(link['href'].to_s).host
@@ -27,15 +27,17 @@ class GoogleFetch
             begin
               emails = "#{page.doc.at('body')}".scan(r).uniq
               f.puts emails
+              print "|" 
+              ctr += emails.count
             rescue
-              f.puts "can't find email here."
+              nil
             end
           end
           #website.on_every_page { |p| f.puts "#{p.doc.at('title')} : #{p.url} #{p.doc.at('body')} : #{host} \n==========================\n" rescue nil }
 	end
       end
     end
-  puts "Done! Check output.txt for emails. MUHAHAHAHAH >:)" 
+  puts "\nFound #{ctr} email(s)! Check output.txt for emails. MUHAHAHAHAH >:)" 
   end
 end
 
