@@ -1,3 +1,3 @@
 require_relative 'google_fetch'
-f = GoogleFetch.new("cebu call centers", 3)
+f = GoogleFetch.new
 puts f.start
