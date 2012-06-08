@@ -20,20 +20,23 @@ class GoogleFetch
     File.open('output.txt', 'w') do |f|
       result.css('h3.r a').each do |link|
         host = URI.parse(link['href'].to_s).host
-        f.puts host + " :\n"
+        f.puts host + "-------------------------\n"
         Anemone.crawl("http://" + host) do |website|
-	  website.on_every_page do |page|
-            r = Regexp.new(/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/)
-            begin
-              emails = "#{page.doc.at('body')}".scan(r).uniq
-              f.puts emails
-              print "|" 
-              ctr += emails.count
-            rescue
-              nil
+          begin
+	    website.on_every_page do |page|
+              r = Regexp.new(/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/)
+              begin
+                emails = "#{page.doc.at('body')}".scan(r).uniq
+                f.puts emails
+                ctr += emails.count
+                puts "#{ctr} emails and counting...\n"
+              rescue
+                nil
+              end
             end
+          rescue Timeout::Error
+            nil
           end
-          #website.on_every_page { |p| f.puts "#{p.doc.at('title')} : #{p.url} #{p.doc.at('body')} : #{host} \n==========================\n" rescue nil }
 	end
       end
     end
