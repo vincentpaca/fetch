@@ -1,3 +1,3 @@
 require_relative 'google_fetch'
-f = GoogleFetch.new
+f = Fetch.new
 puts f.start

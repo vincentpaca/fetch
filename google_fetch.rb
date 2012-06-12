@@ -2,8 +2,9 @@ require 'nokogiri'
 require 'open-uri'
 require 'anemone'
 require 'uri'
+require 'thread'
 
-class GoogleFetch
+class Fetch
   def initialize()
     puts "Input the tags to search for separated in spaces : " 
     @tags = gets.chomp
@@ -12,24 +13,33 @@ class GoogleFetch
   end
 
   def start
-    puts "Crawling #{@pages} result(s) for '#{@tags}'"
-    clean_tag = @tags.gsub(" ", "+");
-    url = "http://www.google.com/search?num=#{@pages}&q=#{clean_tag}"
+    puts "Starting"
+    google_url = "http://www.google.com/search?num=#{@pages}&q=#{@tags.gsub(' ', '+')}"
+    google = Thread.new { parse(google_url, "google") }
+    bing_url = "http://www.bing.com/search?q=#{@tags.gsub(' ', '+')}&first=0&count=#{@pages}"
+    bing = Thread.new { parse(bing_url, "bing") }
+    google.join
+    bing.join
+    puts "Done"
+  end
+
+  def parse(url, search_engine)
+    filename = "#{search_engine}.txt"
     result = Nokogiri::HTML(open(url))
     ctr = 0
-    File.open('output.txt', 'w') do |f|
-      result.css('h3.r a').each do |link|
-        host = URI.parse(link['href'].to_s).host
+    File.open(filename, 'w') do |f|
+      result.css('h3 a').each do |link|
+        host = URI.parse(link['href'].clean).host
         f.puts host + "-------------------------\n"
         Anemone.crawl("http://" + host) do |website|
           begin
-	    website.on_every_page do |page|
+	        website.on_every_page do |page|
               r = Regexp.new(/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/)
               begin
                 emails = "#{page.doc.at('body')}".scan(r).uniq
-                f.puts emails
+                emails.each { |email| f.puts email }
                 ctr += emails.count
-                puts "#{ctr} emails and counting...\n"
+                puts "#{ctr} emails from #{search_engine} and counting...\n"
               rescue
                 nil
               end
@@ -37,15 +47,14 @@ class GoogleFetch
           rescue Timeout::Error
             nil
           end
-	end
+	    end
       end
     end
-  puts "\nFound #{ctr} email(s)! Check output.txt for emails. MUHAHAHAHAH >:)" 
   end
 end
 
 class String
-  def to_s
+  def clean
    str = self.gsub('/url?q=','')
   end
 end
