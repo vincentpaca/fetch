@@ -1,4 +1,4 @@
-A small ruby application that crawls Google search results for emails.
+A small ruby application that crawls Google and Bing search results for emails.
 
 Pre-requisites:
 nokogiri
