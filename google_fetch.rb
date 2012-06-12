@@ -15,8 +15,8 @@ class Fetch
   def start
     puts "Starting"
     google_url = "http://www.google.com/search?num=#{@pages}&q=#{@tags.gsub(' ', '+')}"
+    bing_url = "http://www.bing.com/search?first=0&count=#{@pages}&q=#{@tags.gsub(' ', '+')}" 
     google = Thread.new { parse(google_url, "google") }
-    bing_url = "http://www.bing.com/search?q=#{@tags.gsub(' ', '+')}&first=0&count=#{@pages}"
     bing = Thread.new { parse(bing_url, "bing") }
     google.join
     bing.join
@@ -38,8 +38,8 @@ class Fetch
               begin
                 emails = "#{page.doc.at('body')}".scan(r).uniq
                 emails.each { |email| f.puts email }
+                puts "#{ctr} emails from #{search_engine} and counting...\n" if ctr + emails.count > ctr
                 ctr += emails.count
-                puts "#{ctr} emails from #{search_engine} and counting...\n"
               rescue
                 nil
               end
