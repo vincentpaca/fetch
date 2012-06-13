@@ -23,6 +23,8 @@ class Fetch
     google.join
     bing.join
     puts "Done.\nCollected #{e1} emails on #{p1} pages from Google.\nCollected #{e2} emails on #{p2} pages from Bing."
+    print "Press any key to exit"
+    exit if gets.chomp
   end
 
   def parse(url, search_engine)
@@ -63,3 +65,6 @@ class String
    str = self.gsub('/url?q=','')
   end
 end
+
+f = Fetch.new
+f.start
