@@ -34,26 +34,30 @@ class Fetch
     pages = 0
     File.open(filename, 'w') do |f|
       result.css('h3 a').each do |link|
-        host = URI.parse(link['href'].clean).host
-        f.puts host + "-------------------------\n"
-        Anemone.crawl("http://" + host) do |website|
-          begin
-	        website.on_every_page do |page|
-              pages += 1
-              r = Regexp.new(/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/)
-              begin
-                emails = "#{page.doc.at('body')}".scan(r).uniq
-                emails.each { |email| f.puts email }
-                puts "#{ctr} emails from #{search_engine} and counting...\n" if ctr + emails.count > ctr
-                ctr += emails.count
-              rescue
-                nil
+        begin
+          host = URI.parse(link['href'].clean).host
+          f.puts host + "-------------------------\n"
+          Anemone.crawl("http://" + host) do |website|
+            begin
+	          website.on_every_page do |page|
+                pages += 1
+                r = Regexp.new(/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/)
+                begin
+                  emails = "#{page.doc.at('body')}".scan(r).uniq
+                  emails.each { |email| f.puts email }
+                  puts "#{ctr} emails from #{search_engine} and counting...\n" if ctr + emails.count > ctr
+                  ctr += emails.count
+                rescue
+                  nil
+                end
               end
+            rescue Timeout::Error
+              nil
             end
-          rescue Timeout::Error
-            nil
           end
-	    end
+        rescue
+          nil
+        end
       end
     end
     return pages, ctr
